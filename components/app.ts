@@ -83,11 +83,6 @@ export default Vue.extend({
   // so `compileToFunctions` is the workaround.
   ...compileToFunctions(`
     <div>
-      What
-      {{ files }}
-      ...
-      {{ message }}
-      ---
       <ul>
         <li v-for="item in states()">
           <button @click="showItem(item)">{{ item.path.replace(".md", "") }}</button>
@@ -135,7 +130,7 @@ export default Vue.extend({
         // Code that will run only after the
         // entire view has been re-rendered
 
-        const linksList = [...document.querySelectorAll('a')];
+        const linksList = [...document.querySelectorAll('#md-view a')];
         for (const link of linksList) {
           myOembed(link);
         }
