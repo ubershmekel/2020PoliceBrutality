@@ -89,17 +89,21 @@ export default Vue.extend({
         </li>
       </ul>
 
+      <h1 v-if="editLink">
+        Edit this page at <a :href="editLink">{{ activeStateName }}</a>
+      </h1>
+
       <div id="md-view">
-        <vue-markdown :source="viewing"></vue-markdown>
+        <vue-markdown :source="stateMarkdown"></vue-markdown>
       </div>
     </div>
   `),
   data() {
     return {
-      files: [],
-      message: "hi dude",
-      tree: [],
-      viewing: '',
+      statesList: [],
+      stateMarkdown: '',
+      activeStateName: '',
+      editLink: '',
     };
   },
 
@@ -112,7 +116,7 @@ export default Vue.extend({
       // console.log("this tree", this.tree);
       const result = [];
       const ignores = ["README.md", "CONTRIBUTING.md"];
-      for (const item of this.tree) {
+      for (const item of this.statesList) {
         if (ignores.includes(item.path)) {
           continue;
         }
@@ -120,11 +124,16 @@ export default Vue.extend({
       }
       return result;
     },
+
     async showItem(item: Tree) {
+      // Show for any given state the posts
+      // eg "https://github.com/2020PB/police-brutality/blob/master/Texas.md"
+      this.editLink = `https://github.com/2020PB/police-brutality/blob/master/${item.path}`;
+      this.activeStateName = item.path;
       console.log("item", item);
       const res = await axios.get(item.url);
       const data: FileRootObject = res.data;
-      this.viewing = atob(data.content);
+      this.stateMarkdown = atob(data.content);
 
       this.$nextTick(async function () {
         // Code that will run only after the
@@ -165,6 +174,6 @@ export default Vue.extend({
     const listUrl = "https://api.github.com/repos/2020PB/police-brutality/git/trees/master";
     const res = await axios.get(listUrl);
     const treeRoot: TreeRootObject = res.data;
-    this.tree = treeRoot.tree;
+    this.statesList = treeRoot.tree;
   }
 });
