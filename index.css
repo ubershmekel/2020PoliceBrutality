@@ -7,3 +7,7 @@
 li {
   display: inline-block;
 }
+
+.error-text {
+  color: #f00;
+}

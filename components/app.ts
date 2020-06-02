@@ -62,6 +62,7 @@ async function myOembed(link) {
   jsonp(embedUrl, null, (err, data) => {
     if (err) {
       console.error("embed err", err.message);
+      this.handleError(err);
     } else {
       // console.log(data);
       console.log("oembed data", data);
@@ -89,6 +90,10 @@ export default Vue.extend({
         </li>
       </ul>
 
+      <div class="error-text" v-if="errorText">
+        {{ errorText }}
+      </div>
+
       <h1 v-if="editLink">
         Edit this page at <a :href="editLink">{{ activeStateName }}</a>
       </h1>
@@ -104,6 +109,7 @@ export default Vue.extend({
       stateMarkdown: '',
       activeStateName: '',
       editLink: '',
+      errorText: '',
     };
   },
 
@@ -112,6 +118,18 @@ export default Vue.extend({
   },
 
   methods: {
+    handleError(err) {
+      const pretext = 'Got some sort of error. Feel free to open a github issue and tag @ubershmekel. Please include as much information as possible. Error: ';
+      let summary = '';
+      if (err && err.message) {
+        summary = err.message;
+      } else {
+        summary = JSON.stringify(err);
+      }
+      
+      this.errorText = pretext + summary;
+    },
+
     states() {
       // console.log("this tree", this.tree);
       const result = [];
@@ -131,7 +149,7 @@ export default Vue.extend({
       this.editLink = `https://github.com/2020PB/police-brutality/blob/master/${item.path}`;
       this.activeStateName = item.path;
       console.log("item", item);
-      const res = await axios.get(item.url);
+      const res = await axios.get(item.url).catch(this.handleError);
       const data: FileRootObject = res.data;
       this.stateMarkdown = atob(data.content);
 
@@ -172,7 +190,7 @@ export default Vue.extend({
     // this.message = testData;
 
     const listUrl = "https://api.github.com/repos/2020PB/police-brutality/git/trees/master";
-    const res = await axios.get(listUrl);
+    const res = await axios.get(listUrl).catch(this.handleError);
     const treeRoot: TreeRootObject = res.data;
     this.statesList = treeRoot.tree;
   }
