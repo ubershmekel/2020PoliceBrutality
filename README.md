@@ -1,3 +1,8 @@
+# Site to help navigate the /r/2020policebrutality tracking repo
+
+* https://2020policebrutality.netlify.app/
+* https://www.reddit.com/r/2020policebrutality
+
 # Dev notes
 
 * https://vuejsdevelopers.com/2017/03/24/vue-js-component-templates/
