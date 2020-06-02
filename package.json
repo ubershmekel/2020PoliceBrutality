@@ -13,12 +13,8 @@
     "@babel/runtime": "^7.10.2",
     "axios": "^0.19.2",
     "babel-runtime": "^6.26.0",
-    "embed-js": "^5.0.4",
-    "embed-plugin-twitter": "^5.0.4",
     "jsonp": "^0.2.1",
-    "oembed-all": "^1.2.0",
     "parcel": "^2.0.0-alpha.3.2",
-    "unfurl.js": "^5.1.0",
     "vue": "^2.6.11",
     "vue-markdown": "^2.2.4",
     "vue-template-compiler": "^2.6.11"
