@@ -1,9 +1,82 @@
 import Vue from "vue";
 import axios from "axios";
-import {compileToFunctions} from 'vue-template-compiler';
+import { compileToFunctions } from 'vue-template-compiler';
 import { TreeRootObject, Tree, FileRootObject } from "../types/github-types";
 import VueMarkdown from 'vue-markdown';
+import jsonp from 'jsonp';
 
+
+// import oEmbed from 'oembed-all';
+// import EmbedJS from 'embed-js'
+// import twitter from 'embed-plugin-twitter'
+// import url from 'embed-plugin-url'
+// import emoji from 'embed-plugin-emoji'
+// import { unfurl } from 'unfurl.js'
+
+function nodeScriptReplace(node) {
+  if (nodeScriptIs(node) === true) {
+    node.parentNode.replaceChild(nodeScriptClone(node), node);
+  }
+  else {
+    var i = 0;
+    var children = node.childNodes;
+    while (i < children.length) {
+      nodeScriptReplace(children[i++]);
+    }
+  }
+
+  return node;
+}
+function nodeScriptIs(node) {
+  return node.tagName === 'SCRIPT';
+}
+function nodeScriptClone(node) {
+  var script = document.createElement("script");
+  script.text = node.innerHTML;
+  for (var i = node.attributes.length - 1; i >= 0; i--) {
+    script.setAttribute(node.attributes[i].name, node.attributes[i].value);
+  }
+  return script;
+}
+
+function redditEmbed(url) {
+  return `<blockquote class="reddit-card" data-card-created="1591095929"><a href="${url}">asdf</a></blockquote>
+  <script async src="//embed.redditmedia.com/widgets/platform.js" charset="UTF-8"></script>`
+}
+
+async function myOembed(link) {
+  let domain = link.hostname;
+  if (domain === "www.twitter.com" || domain === "twitter.com" || domain === "mobile.twitter.com") {
+    domain = "publish.twitter.com";
+  }
+  const embedUrl = `https://${domain}/oembed?url=${encodeURIComponent(link.href)}`;
+  if (domain === "www.reddit.com") {
+    // const data: any = await axios.get(embedUrl);
+    const embedNode = document.createElement('div');
+    embedNode.innerHTML = redditEmbed(link.href);
+    // embedNode.innerHTML = data.html;
+    link.parentElement.appendChild(embedNode);
+    nodeScriptReplace(link.parentElement);
+    return;
+  }
+  jsonp(embedUrl, null, (err, data) => {
+    if (err) {
+      console.error("embed err", err.message);
+    } else {
+      // console.log(data);
+      console.log("oembed data", data);
+      if (data.html) {
+        const embedNode = document.createElement('div');
+        embedNode.innerHTML = data.html;
+        link.parentElement.appendChild(embedNode);
+        nodeScriptReplace(link.parentElement);
+        // while (temp.firstChild) {
+        //   target.appendChild(temp.firstChild);
+        // }
+      }
+    }
+  })
+}
 
 export default Vue.extend({
   // Parcel 2 does not yet support vue single file components
@@ -17,11 +90,11 @@ export default Vue.extend({
       ---
       <ul>
         <li v-for="item in states()">
-          <button @click="showItem(item)">{{ item.path }}</button>
+          <button @click="showItem(item)">{{ item.path.replace(".md", "") }}</button>
         </li>
       </ul>
 
-      <div class="view">
+      <div id="md-view">
         <vue-markdown :source="viewing"></vue-markdown>
       </div>
     </div>
@@ -41,7 +114,7 @@ export default Vue.extend({
 
   methods: {
     states() {
-      console.log("this tree", this.tree);
+      // console.log("this tree", this.tree);
       const result = [];
       const ignores = ["README.md", "CONTRIBUTING.md"];
       for (const item of this.tree) {
@@ -57,6 +130,34 @@ export default Vue.extend({
       const res = await axios.get(item.url);
       const data: FileRootObject = res.data;
       this.viewing = atob(data.content);
+
+      this.$nextTick(async function () {
+        // Code that will run only after the
+        // entire view has been re-rendered
+
+        const linksList = [...document.querySelectorAll('a')];
+        for (const link of linksList) {
+          myOembed(link);
+        }
+        
+        
+        // const options = {};
+        // console.log("unfurl", link.href, await unfurl(link.href));
+        // const embed = new oEmbed(link, options);
+        // console.log("oembed", embed);
+
+        // const emb = new EmbedJS({
+        //   input: document.getElementById('md-view'),
+        //   plugins: [
+        //     // url(),
+        //     // emoji(),
+        //     twitter(),
+        //   ]
+        // })
+        // emb.render();
+      })
+
+
     }
   },
 
