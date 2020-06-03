@@ -1,18 +1,10 @@
 import Vue from "vue";
 import axios from "axios";
 import { compileToFunctions } from 'vue-template-compiler';
-import { TreeRootObject, Tree, FileRootObject } from "../types/github-types";
+import { TreeRootObject, Tree, FileRootObject } from "../../types/github-types";
 import VueMarkdown from 'vue-markdown';
 
-import { myOembed } from '../client/embed';
-
-// import oEmbed from 'oembed-all';
-// import EmbedJS from 'embed-js'
-// import twitter from 'embed-plugin-twitter'
-// import url from 'embed-plugin-url'
-// import emoji from 'embed-plugin-emoji'
-// import { unfurl } from 'unfurl.js'
-
+import { myOembed } from '../embed';
 
 
 export default Vue.extend({

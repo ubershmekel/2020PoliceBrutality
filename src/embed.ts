@@ -1,5 +1,15 @@
 import jsonp from 'jsonp';
 
+// Look at all these things I tried to use and failed,
+// So I wrote an embedder from scratch, again.
+// import oEmbed from 'oembed-all';
+// import EmbedJS from 'embed-js'
+// import twitter from 'embed-plugin-twitter'
+// import url from 'embed-plugin-url'
+// import emoji from 'embed-plugin-emoji'
+// import { unfurl } from 'unfurl.js'
+
+
 function redditEmbed(url: string) {
   return `<blockquote class="reddit-card" data-card-created="1591095929"><a href="${url}">asdf</a></blockquote>
   <script async src="//embed.redditmedia.com/widgets/platform.js" charset="UTF-8"></script>`
@@ -16,10 +26,8 @@ export async function myOembed(link: HTMLAnchorElement) {
   }
   const embedInTo = link.parentElement;
   if (domain === "www.reddit.com") {
-    // const data: any = await axios.get(embedUrl);
     const embedNode = document.createElement('div');
     embedNode.innerHTML = redditEmbed(link.href);
-    // embedNode.innerHTML = data.html;
     embedInTo.appendChild(embedNode);
     nodeScriptReplace(link.parentElement);
     return;
