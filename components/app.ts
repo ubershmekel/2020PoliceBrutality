@@ -189,7 +189,7 @@ export default Vue.extend({
     // const testData = await axios.get(testUrl);
     // this.message = testData;
 
-    const listUrl = "https://api.github.com/repos/2020PB/police-brutality/git/trees/master";
+    const listUrl = "https://api.github.com/repos/2020PB/police-brutality/git/trees/25b0aee35f6634c4b2614a5687c5139daff07cbd";
     const res = await axios.get(listUrl).catch(this.handleError);
     const treeRoot: TreeRootObject = res.data;
     this.statesList = treeRoot.tree;
