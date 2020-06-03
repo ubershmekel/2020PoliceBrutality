@@ -11,3 +11,7 @@ li {
 .error-text {
   color: #f00;
 }
+
+button:disabled {
+  cursor: default;
+}
