@@ -21,3 +21,7 @@
   /* padding-inline-start was buttons to be padded by the user-agent stylesheet  */
   padding-inline-start: 0;
 }
+
+button:disabled {
+  cursor: default;
+}

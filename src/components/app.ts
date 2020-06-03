@@ -1,7 +1,7 @@
 import Vue from "vue";
 import axios from "axios";
 import { compileToFunctions } from 'vue-template-compiler';
-import { ContentsRoot, Tree, FileRootObject, ContentsObject } from "../types/github-types";
+import { ContentsRoot, FileRootObject, ContentsObject } from "../types/github-types";
 import VueMarkdown from 'vue-markdown';
 
 import { myOembed } from '../embed';
@@ -14,7 +14,7 @@ export default Vue.extend({
     <div>
       <ul class="states-list">
         <li v-for="item in states()">
-          <button @click="showItem(item)">{{ stateItemName(item) }}</button>
+          <button @click="showItem(item)" :disabled="activeStateName === item.name">{{ stateItemName(item) }}</button>
         </li>
       </ul>
 
@@ -23,7 +23,7 @@ export default Vue.extend({
       </div>
 
       <h1 v-if="editLink">
-        Edit this page at <a :href="editLink">{{ activeStateName }}</a>
+        Edit this page at <a :href="editLink">{{ activeStatePath }}</a>
       </h1>
 
       <div id="md-view">
@@ -35,6 +35,7 @@ export default Vue.extend({
     return {
       statesList: [] as ContentsRoot,
       stateMarkdown: '',
+      activeStatePath: '',
       activeStateName: '',
       editLink: '',
       errorText: '',
@@ -54,7 +55,7 @@ export default Vue.extend({
       } else {
         summary = JSON.stringify(err);
       }
-      
+
       this.errorText = pretext + summary;
     },
 
@@ -76,15 +77,17 @@ export default Vue.extend({
       return result;
     },
 
-    async showItem(item: Tree) {
+    async showItem(item: ContentsObject) {
+      const { path, name, url } = item;
       // Show for any given state the posts
       // eg "https://github.com/2020PB/police-brutality/blob/master/Texas.md"
-      this.editLink = `https://github.com/2020PB/police-brutality/blob/master/${item.path}`;
-      this.activeStateName = item.path;
+      this.editLink = `https://github.com/2020PB/police-brutality/blob/master/${path}`;
+      this.activeStateName = name;
+      this.activeStatePath = path;
       console.log("item", item);
       let res;
       try {
-        res = await axios.get(item.url);
+        res = await axios.get(url);
         if (!res) {
           throw new Error("axios returned nothing");
         }
@@ -107,8 +110,8 @@ export default Vue.extend({
             console.log("Failed to embed", link);
           }
         }
-        
-        
+
+
         // const options = {};
         // console.log("unfurl", link.href, await unfurl(link.href));
         // const embed = new oEmbed(link, options);
@@ -137,7 +140,7 @@ export default Vue.extend({
 
     // const listUrl = "https://api.github.com/repos/2020PB/police-brutality/git/trees/master";
     const listUrl = "https://api.github.com/repos/2020PB/police-brutality/contents/reports";
-    
+
     let res;
     try {
       res = await axios.get(listUrl);
