@@ -96,7 +96,7 @@ export default Vue.extend({
         return;
       }
       const data: FileRootObject = res.data;
-      this.stateMarkdown = atob(data.content);
+      this.stateMarkdown = b64DecodeUnicode(data.content);
 
       this.$nextTick(async function () {
         // Code that will run only after the
@@ -157,3 +157,13 @@ export default Vue.extend({
     this.statesList = treeRoot;
   }
 });
+
+
+function b64DecodeUnicode(str: string) {
+  // We need to use this instead of `atob` because some unicode characters were
+  // getting corrupted by `atob`.
+  // https://stackoverflow.com/questions/30106476/using-javascripts-atob-to-decode-base64-doesnt-properly-decode-utf-8-strings
+  return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+  }).join(''))
+}
