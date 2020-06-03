@@ -1,5 +1,6 @@
 import Vue from "vue";
 import axios from "axios";
+import { Base64 } from "js-base64";
 import { compileToFunctions } from 'vue-template-compiler';
 import { ContentsRoot, Tree, FileRootObject, ContentsObject } from "../../types/github-types";
 import VueMarkdown from 'vue-markdown';
@@ -54,7 +55,7 @@ export default Vue.extend({
       } else {
         summary = JSON.stringify(err);
       }
-      
+
       this.errorText = pretext + summary;
     },
 
@@ -93,7 +94,7 @@ export default Vue.extend({
         return;
       }
       const data: FileRootObject = res.data;
-      this.stateMarkdown = atob(data.content);
+      this.stateMarkdown = Base64.decode(data.content);
 
       this.$nextTick(async function () {
         // Code that will run only after the
@@ -107,8 +108,8 @@ export default Vue.extend({
             console.log("Failed to embed", link);
           }
         }
-        
-        
+
+
         // const options = {};
         // console.log("unfurl", link.href, await unfurl(link.href));
         // const embed = new oEmbed(link, options);
@@ -137,7 +138,7 @@ export default Vue.extend({
 
     // const listUrl = "https://api.github.com/repos/2020PB/police-brutality/git/trees/master";
     const listUrl = "https://api.github.com/repos/2020PB/police-brutality/contents/reports";
-    
+
     let res;
     try {
       res = await axios.get(listUrl);
