@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import App from './components/app.ts';
+import App from './components/app';
 
 import 'regenerator-runtime/runtime';
 

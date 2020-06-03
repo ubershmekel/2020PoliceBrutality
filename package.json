@@ -11,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "@babel/runtime": "^7.10.2",
+    "@types/jsonp": "^0.2.0",
+    "@types/vue-markdown": "^2.2.1",
     "axios": "^0.19.2",
     "babel-runtime": "^6.26.0",
     "jsonp": "^0.2.1",

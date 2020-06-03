@@ -3,8 +3,8 @@ import axios from "axios";
 import { compileToFunctions } from 'vue-template-compiler';
 import { TreeRootObject, Tree, FileRootObject } from "../types/github-types";
 import VueMarkdown from 'vue-markdown';
-import jsonp from 'jsonp';
 
+import { myOembed } from '../client/embed';
 
 // import oEmbed from 'oembed-all';
 // import EmbedJS from 'embed-js'
@@ -13,71 +13,7 @@ import jsonp from 'jsonp';
 // import emoji from 'embed-plugin-emoji'
 // import { unfurl } from 'unfurl.js'
 
-function nodeScriptReplace(node) {
-  if (nodeScriptIs(node) === true) {
-    node.parentNode.replaceChild(nodeScriptClone(node), node);
-  }
-  else {
-    var i = 0;
-    var children = node.childNodes;
-    while (i < children.length) {
-      nodeScriptReplace(children[i++]);
-    }
-  }
 
-  return node;
-}
-function nodeScriptIs(node) {
-  return node.tagName === 'SCRIPT';
-}
-function nodeScriptClone(node) {
-  var script = document.createElement("script");
-  script.text = node.innerHTML;
-  for (var i = node.attributes.length - 1; i >= 0; i--) {
-    script.setAttribute(node.attributes[i].name, node.attributes[i].value);
-  }
-  return script;
-}
-
-function redditEmbed(url) {
-  return `<blockquote class="reddit-card" data-card-created="1591095929"><a href="${url}">asdf</a></blockquote>
-  <script async src="//embed.redditmedia.com/widgets/platform.js" charset="UTF-8"></script>`
-}
-
-async function myOembed(link) {
-  let domain = link.hostname;
-  if (domain === "www.twitter.com" || domain === "twitter.com" || domain === "mobile.twitter.com") {
-    domain = "publish.twitter.com";
-  }
-  const embedUrl = `https://${domain}/oembed?url=${encodeURIComponent(link.href)}`;
-  if (domain === "www.reddit.com") {
-    // const data: any = await axios.get(embedUrl);
-    const embedNode = document.createElement('div');
-    embedNode.innerHTML = redditEmbed(link.href);
-    // embedNode.innerHTML = data.html;
-    link.parentElement.appendChild(embedNode);
-    nodeScriptReplace(link.parentElement);
-    return;
-  }
-  jsonp(embedUrl, null, (err, data) => {
-    if (err) {
-      console.error("embed err", err.message);
-      this.handleError(err);
-    } else {
-      // console.log(data);
-      console.log("oembed data", data);
-      if (data.html) {
-        const embedNode = document.createElement('div');
-        embedNode.innerHTML = data.html;
-        link.parentElement.appendChild(embedNode);
-        nodeScriptReplace(link.parentElement);
-        // while (temp.firstChild) {
-        //   target.appendChild(temp.firstChild);
-        // }
-      }
-    }
-  })
-}
 
 export default Vue.extend({
   // Parcel 2 does not yet support vue single file components
@@ -105,7 +41,7 @@ export default Vue.extend({
   `),
   data() {
     return {
-      statesList: [],
+      statesList: [] as Tree[],
       stateMarkdown: '',
       activeStateName: '',
       editLink: '',
@@ -118,7 +54,7 @@ export default Vue.extend({
   },
 
   methods: {
-    handleError(err) {
+    handleError(err: Error) {
       const pretext = 'Got some sort of error. Feel free to open a github issue and tag @ubershmekel. Please include as much information as possible. Error: ';
       let summary = '';
       if (err && err.message) {
@@ -149,7 +85,16 @@ export default Vue.extend({
       this.editLink = `https://github.com/2020PB/police-brutality/blob/master/${item.path}`;
       this.activeStateName = item.path;
       console.log("item", item);
-      const res = await axios.get(item.url).catch(this.handleError);
+      let res;
+      try {
+        res = await axios.get(item.url);
+        if (!res) {
+          throw new Error("axios returned nothing");
+        }
+      } catch (err) {
+        this.handleError(err);
+        return;
+      }
       const data: FileRootObject = res.data;
       this.stateMarkdown = atob(data.content);
 
@@ -157,7 +102,7 @@ export default Vue.extend({
         // Code that will run only after the
         // entire view has been re-rendered
 
-        const linksList = [...document.querySelectorAll('#md-view a')];
+        const linksList = [...document.querySelectorAll('#md-view a')] as HTMLAnchorElement[];
         for (const link of linksList) {
           myOembed(link);
         }
@@ -190,7 +135,17 @@ export default Vue.extend({
     // this.message = testData;
 
     const listUrl = "https://api.github.com/repos/2020PB/police-brutality/git/trees/master";
-    const res = await axios.get(listUrl).catch(this.handleError);
+    let res;
+    try {
+      res = await axios.get(listUrl);
+      if (!res) {
+        throw new Error("axios returned nothing listUrl");
+      }
+    } catch (err) {
+      this.handleError(err);
+      return;
+    }
+
     const treeRoot: TreeRootObject = res.data;
     this.statesList = treeRoot.tree;
   }
