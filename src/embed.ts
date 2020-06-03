@@ -20,6 +20,7 @@ const domainToEmbedder: {[dom: string]: (link: HTMLAnchorElement) =>Promise<stri
   "twitter.com": twitterJsonp,
   "mobile.twitter.com": twitterJsonp,
   "www.reddit.com": redditEmbed,
+  "old.reddit.com": redditEmbed,
 }
 
 async function jsonpOembed(embedUrl: string): Promise<string> {
