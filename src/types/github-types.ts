@@ -11,7 +11,6 @@ Example Tree
 */
 export interface Tree {
   path: string;
-  name: string;
   mode: string;
   type: string;
   sha: string;

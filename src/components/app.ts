@@ -1,7 +1,7 @@
 import Vue from "vue";
 import axios from "axios";
 import { compileToFunctions } from 'vue-template-compiler';
-import { ContentsRoot, Tree, FileRootObject, ContentsObject } from "../types/github-types";
+import { ContentsRoot, FileRootObject, ContentsObject } from "../types/github-types";
 import VueMarkdown from 'vue-markdown';
 
 import { myOembed } from '../embed';
@@ -77,7 +77,7 @@ export default Vue.extend({
       return result;
     },
 
-    async showItem(item: Tree) {
+    async showItem(item: ContentsObject) {
       const { path, name, url } = item;
       // Show for any given state the posts
       // eg "https://github.com/2020PB/police-brutality/blob/master/Texas.md"
