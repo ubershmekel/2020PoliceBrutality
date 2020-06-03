@@ -10,50 +10,77 @@ import jsonp from 'jsonp';
 // import { unfurl } from 'unfurl.js'
 
 
-function redditEmbed(url: string) {
-  return `<blockquote class="reddit-card" data-card-created="1591095929"><a href="${url}">asdf</a></blockquote>
+async function redditEmbed(link: HTMLAnchorElement) {
+  return `<blockquote class="reddit-card" data-card-created="1591095929"><a href="${link.href}">asdf</a></blockquote>
   <script async src="//embed.redditmedia.com/widgets/platform.js" charset="UTF-8"></script>`
+}
+
+const domainToEmbedder: {[dom: string]: (link: HTMLAnchorElement) =>Promise<string> } = {
+  "www.twitter.com": twitterJsonp,
+  "twitter.com": twitterJsonp,
+  "mobile.twitter.com": twitterJsonp,
+  "www.reddit.com": redditEmbed,
+}
+
+async function jsonpOembed(embedUrl: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    jsonp(embedUrl, undefined, (err: Error | null, data: any) => {
+      if (err) {
+        console.error("embed err", err.message);
+        reject(err);
+      } else {
+        // console.log(data);
+        console.log("oembed data", data);
+        if (data.html) {
+          return resolve(data.html);
+        } else {
+          reject(new Error("data did not have html in it to embed"));
+        }
+      }
+    })
+  });
+}
+
+async function twitterJsonp(link: HTMLAnchorElement) {
+  const domain = "publish.twitter.com";
+  const embedUrl = buildEmbedUrl(domain, link.href);
+  return jsonpOembed(embedUrl);
+}
+
+function buildEmbedUrl(domain: string, url: string) {
+  return `https://${domain}/oembed?url=${encodeURIComponent(url)}`;
+}
+
+async function defaultEmbedder(link: HTMLAnchorElement) {
+  const domain = link.hostname;
+  const embedUrl = buildEmbedUrl(domain, link.href);
+  const html = await jsonpOembed(embedUrl);
+  return html;
 }
 
 export async function myOembed(link: HTMLAnchorElement) {
   let domain = link.hostname;
-  if (domain === "www.twitter.com" || domain === "twitter.com" || domain === "mobile.twitter.com") {
-    domain = "publish.twitter.com";
+  let html = '';
+  if (domain in domainToEmbedder) {
+    html = await domainToEmbedder[domain](link);
+  } else {
+    html = await defaultEmbedder(link);
   }
-  const embedUrl = `https://${domain}/oembed?url=${encodeURIComponent(link.href)}`;
+
+  if (!html) {
+    throw new Error("Failed to get html for this one: " + link.href);
+  }
   if (!link.parentElement) {
     throw new Error("This link element does not have a parent element, odd");
   }
   const embedInTo = link.parentElement;
-  if (domain === "www.reddit.com") {
-    const embedNode = document.createElement('div');
-    embedNode.innerHTML = redditEmbed(link.href);
-    embedInTo.appendChild(embedNode);
-    nodeScriptReplace(link.parentElement);
-    return;
-  }
-  jsonp(embedUrl, undefined, (err: Error | null, data: any) => {
-    if (err) {
-      console.error("embed err", err.message);
-      // this.handleError(err);
-      throw err;
-    } else {
-      // console.log(data);
-      console.log("oembed data", data);
-      if (data.html) {
-        const embedNode = document.createElement('div');
-        embedNode.innerHTML = data.html;
-        embedInTo.appendChild(embedNode);
-        nodeScriptReplace(link.parentElement);
-        // while (temp.firstChild) {
-        //   target.appendChild(temp.firstChild);
-        // }
-      }
-    }
-  })
+
+  const embedNode = document.createElement('div');
+  embedNode.innerHTML = html;
+  embedInTo.appendChild(embedNode);
+  nodeScriptReplace(link.parentElement);
+
 }
-
-
 
 function nodeScriptReplace(node: HTMLElement | null) {
   // https://stackoverflow.com/questions/1197575/can-scripts-be-inserted-with-innerhtml

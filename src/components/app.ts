@@ -1,7 +1,7 @@
 import Vue from "vue";
 import axios from "axios";
 import { compileToFunctions } from 'vue-template-compiler';
-import { TreeRootObject, Tree, FileRootObject } from "../../types/github-types";
+import { ContentsRoot, Tree, FileRootObject, ContentsObject } from "../../types/github-types";
 import VueMarkdown from 'vue-markdown';
 
 import { myOembed } from '../embed';
@@ -14,7 +14,7 @@ export default Vue.extend({
     <div>
       <ul>
         <li v-for="item in states()">
-          <button @click="showItem(item)">{{ item.path.replace(".md", "") }}</button>
+          <button @click="showItem(item)">{{ stateItemName(item) }}</button>
         </li>
       </ul>
 
@@ -33,7 +33,7 @@ export default Vue.extend({
   `),
   data() {
     return {
-      statesList: [] as Tree[],
+      statesList: [] as ContentsRoot,
       stateMarkdown: '',
       activeStateName: '',
       editLink: '',
@@ -56,6 +56,11 @@ export default Vue.extend({
       }
       
       this.errorText = pretext + summary;
+    },
+
+    stateItemName(item: ContentsObject) {
+      // return item.path.replace(".md", "")
+      return item.name.replace(".md", "");
     },
 
     states() {
@@ -96,7 +101,11 @@ export default Vue.extend({
 
         const linksList = [...document.querySelectorAll('#md-view a')] as HTMLAnchorElement[];
         for (const link of linksList) {
-          myOembed(link);
+          try {
+            myOembed(link);
+          } catch(err) {
+            console.log("Failed to embed", link);
+          }
         }
         
         
@@ -126,7 +135,9 @@ export default Vue.extend({
     // const testData = await axios.get(testUrl);
     // this.message = testData;
 
-    const listUrl = "https://api.github.com/repos/2020PB/police-brutality/git/trees/master";
+    // const listUrl = "https://api.github.com/repos/2020PB/police-brutality/git/trees/master";
+    const listUrl = "https://api.github.com/repos/2020PB/police-brutality/contents/reports";
+    
     let res;
     try {
       res = await axios.get(listUrl);
@@ -138,7 +149,8 @@ export default Vue.extend({
       return;
     }
 
-    const treeRoot: TreeRootObject = res.data;
-    this.statesList = treeRoot.tree;
+    console.log("Got data");
+    const treeRoot: ContentsRoot = res.data;
+    this.statesList = treeRoot;
   }
 });
