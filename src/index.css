@@ -4,10 +4,20 @@
   background-color: #fff;
 }
 
-li {
+.states-list li {
   display: inline-block;
 }
 
 .error-text {
   color: #f00;
+}
+
+.embedded {
+  /* avoid twitter and reddit cards from being too wide on phones */
+  width: 90%;
+}
+
+* {
+  /* padding-inline-start was buttons to be padded by the user-agent stylesheet  */
+  padding-inline-start: 0;
 }

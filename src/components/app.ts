@@ -1,7 +1,7 @@
 import Vue from "vue";
 import axios from "axios";
 import { compileToFunctions } from 'vue-template-compiler';
-import { ContentsRoot, Tree, FileRootObject, ContentsObject } from "../../types/github-types";
+import { ContentsRoot, Tree, FileRootObject, ContentsObject } from "../types/github-types";
 import VueMarkdown from 'vue-markdown';
 
 import { myOembed } from '../embed';
@@ -12,7 +12,7 @@ export default Vue.extend({
   // so `compileToFunctions` is the workaround.
   ...compileToFunctions(`
     <div>
-      <ul>
+      <ul class="states-list">
         <li v-for="item in states()">
           <button @click="showItem(item)">{{ stateItemName(item) }}</button>
         </li>

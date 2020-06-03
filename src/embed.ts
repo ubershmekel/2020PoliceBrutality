@@ -78,6 +78,7 @@ export async function myOembed(link: HTMLAnchorElement) {
   const embedNode = document.createElement('div');
   embedNode.innerHTML = html;
   embedInTo.appendChild(embedNode);
+  embedNode.className = "embedded";
   nodeScriptReplace(link.parentElement);
 
 }
