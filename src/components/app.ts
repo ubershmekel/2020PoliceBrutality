@@ -12,6 +12,9 @@ export default Vue.extend({
   // so `compileToFunctions` is the workaround.
   ...compileToFunctions(`
     <div>
+      <div v-if="states().length == 0 && !errorText" class="loader">
+        Loading...
+      </div>
       <ul class="states-list">
         <li v-for="item in states()">
           <button @click="showItem(item)" :disabled="activeStateName === item.name">{{ stateItemName(item) }}</button>
