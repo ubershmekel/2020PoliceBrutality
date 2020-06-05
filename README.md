@@ -1,7 +1,6 @@
-# Site to help navigate the /r/2020policebrutality tracking repo
+# Site to help navigate the [/r/2020policebrutality](https://www.reddit.com/r/2020policebrutality) tracking repository [(Found here)](https://github.com/2020PB/police-brutality/)
 
-* https://2020policebrutality.netlify.app/
-* https://www.reddit.com/r/2020policebrutality
+### This app is hosted at https://2020policebrutality.netlify.app/
 
 # Dev notes
 
